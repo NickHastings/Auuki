@@ -111,6 +111,9 @@ function Intervals(args = {}) {
     }
 
     async function uploadWorkout(record) {
+        if(config.get().BACKEND_DISABLED) {
+            return await uploadWorkoutDev(record);
+        }
         const blob = record.blob;
         const workoutName = record.summary?.name ?? 'Powered by Auuki workout';
         const url = `${api_uri}/api/intervals/upload`;
@@ -143,6 +146,50 @@ function Intervals(args = {}) {
         }
     }
 
+    async function uploadWorkoutDev(record) {
+        const devKey = devKeyStorage.get()
+        if(!devKey) {
+            console.warn('intervals.wodDev: no developer key found (config or localStorage)');
+            xf.dispatch('action:planned', ':intervals:wod:fail');
+            return [];
+        }
+        // Use athlete id 0 to refer to the API key owner: GET /api/v1/athlete/0/events
+        let authHeader = buildDevKeyAuthHeader(devKey);
+        const blob = record.blob;
+        const workoutName = record.summary?.name ?? 'Powered by Auuki workout';
+        console.log(`Uploading ${workoutName} to intervals.icu`);
+
+        const url = `${intervals_base_uri}/athlete/0/activities`;
+        const formData = new FormData();
+        formData.append('file', blob);
+        formData.append('name', workoutName);
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: {
+                    'Authorization': authHeader,
+                    'Accept': 'application/json',
+                },
+                body: formData,
+
+            });
+
+            if(response.ok) {
+                return ':success';
+            } else {
+                if(response.status === 403) {
+                    console.log(`:api :no-auth`);
+                    xf.dispatch('action:auth', ':password:login');
+
+                    xf.dispatch('ui:modal:error:open', DialogMsg.noAuth);
+                }
+                return ':fail';
+            }
+        } catch(error) {
+            console.log(error);
+            return ':fail';
+        }
+    }
     /*
     async function wod() {
         const oldest = isoDate();
