@@ -648,7 +648,22 @@
                 <div id="view--settings-profile" class="sub-tab">
                     <!-- auth -->
                     <div class="auth">
-                        <auth-forms>
+                      <auth-forms>
+                        <!-- Developer Mode UI (shown when BACKEND_DISABLED is true) -->
+                            <div id="dev-mode--forms" class="dev-mode-forms">
+                                <h2 class="form--header">Developer Mode</h2>
+                                <p class="dev-mode--description">
+                                    Backend is disabled. Configure your Intervals.icu developer API key below.
+                                </p>
+                                <div class="form--group">
+                                    <label for="auth-intervals-dev-key" class="form--label">Intervals.icu Dev Key</label>
+                                    <input id="auth-intervals-dev-key" class="input" type="text" placeholder="paste developer key here" />
+                                </div>
+                                <div class="form--submit--section">
+                                    <button id="auth-intervals-save-btn" class="btn">Save Settings</button>
+                                    <button id="auth-intervals-clear-btn" class="btn">Clear</button>
+                                </div>
+                            </div>
                             <div id="password--forms" class="active">
                                 <form id="register--form" class="register--form">
                                     <h2 class="form--header">Register</h2>
